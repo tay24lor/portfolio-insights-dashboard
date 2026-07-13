@@ -1,59 +1,100 @@
-# PortfolioInsightsDashboard
+# Portfolio Insights Dashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.27.
+A full-stack portfolio analytics dashboard with an Angular frontend and an Express/TypeScript backend. The application provides authenticated access to holdings, portfolio summary data, and a user login flow.
 
-## Development server
+## Repository structure
 
-To start a local development server, run:
+- `frontend/` — Angular 19 application with Material UI and client-side routing
+- `backend/` — Express API server with TypeScript, JWT authentication, and mock data
 
-```bash
-ng serve
-```
+## Prerequisites
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node.js 18 or later
+- npm 10 or later
 
-## Code scaffolding
+## Local setup
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 1. Install dependencies
 
 ```bash
-ng generate --help
+cd backend
+npm install
+
+cd ../frontend
+npm install
 ```
 
-## Building
-
-To build the project run:
+### 2. Start the backend
 
 ```bash
-ng build
+cd backend
+npm run dev
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The backend runs by default on `http://localhost:8080`.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### 3. Start the frontend
 
 ```bash
-ng test
+cd frontend
+npm start
 ```
 
-## Running end-to-end tests
+The frontend runs by default on `http://localhost:4200`.
 
-For end-to-end (e2e) testing, run:
+## Authentication
 
-```bash
-ng e2e
-```
+The frontend uses JWT authentication for protected API requests. A valid token is stored in browser local storage after login.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Default mock credentials
 
-## Additional Resources
+- Email: `test@example.com`
+- Password: `password`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Available commands
+
+### Backend
+
+From `backend/`:
+
+- `npm run dev` — start the backend in development mode with hot reload
+- `npm run build` — compile the backend TypeScript to `dist/`
+- `npm start` — run the built backend from `dist/`
+
+### Frontend
+
+From `frontend/`:
+
+- `npm start` — launch the Angular development server
+- `npm run build` — build the frontend for production
+- `npm test` — run unit tests
+- `npm run watch` — build continuously in development mode
+- `npm run serve:ssr:frontend` — run SSR backend bundle after building
+
+## API endpoints
+
+### Auth
+
+- `POST /api/auth/login` — authenticate user and receive a JWT
+- `POST /api/auth/register` — register a new user (development only)
+
+### Portfolio
+
+- `GET /api/portfolio/summary` — fetch portfolio summary
+- `GET /api/holdings` — fetch authenticated user's holdings
+
+## Notes
+
+- The backend currently uses mock data in `backend/src/mock/`
+- The frontend injects an authorization header using the stored JWT on each request
+- The layout includes a logout button in the top-right toolbar to return to the login screen
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request with tests and documentation updates
+
+## License
+
+This repository does not include a license file. Add one if you want to publish or share this project publicly.

@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   standalone: true,
@@ -48,8 +49,8 @@ import { RouterModule } from '@angular/router';
 
           <span class="spacer"></span>
 
-          <button mat-icon-button>
-            <mat-icon>account_circle</mat-icon>
+          <button mat-icon-button (click)="logout()" aria-label="Logout">
+            <mat-icon>logout</mat-icon>
           </button>
         </mat-toolbar>
 
@@ -91,7 +92,15 @@ import { RouterModule } from '@angular/router';
   `]
 })
 export class LayoutComponent {
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   toggle() {
     // For mobile later
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 }
