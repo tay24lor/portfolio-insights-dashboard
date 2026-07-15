@@ -8,11 +8,11 @@ describe('PerformanceComponent', () => {
   let fixture: ComponentFixture<PerformanceComponent>;
 
   beforeEach(async () => {
-    const portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', ['getSummary']);
-    portfolioServiceSpy.getSummary.and.returnValue(of({
-      total_value: 120000,
-      holdings_count: 2,
-      allocation: []
+    const portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', ['getPerformance']);
+    portfolioServiceSpy.getPerformance.and.returnValue(of({
+      total_return: 20000,
+      return_rate: 20,
+      trend: [{ label: 'Jan', value: 60 }]
     }));
 
     await TestBed.configureTestingModule({
@@ -25,9 +25,10 @@ describe('PerformanceComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders the performance summary and trend section', () => {
+  it('renders the performance summary and trend data from the API', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Performance');
     expect(compiled.textContent).toContain('Portfolio Value Trend');
+    expect(compiled.textContent).toContain('Jan');
   });
 });

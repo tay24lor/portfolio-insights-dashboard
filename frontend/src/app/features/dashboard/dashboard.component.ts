@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { PortfolioService, PortfolioSummary, AllocationItem } from '../../core/services/portfolio.service';
+import { appColors } from '../../shared/theme/colors';
 
 interface ChartSegment {
   color: string;
@@ -179,12 +180,12 @@ interface HoldingRow {
       margin: 0 0 6px;
       font-size: 32px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .header p {
       margin: 0;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 15px;
     }
 
@@ -194,8 +195,8 @@ interface HoldingRow {
       gap: 12px;
       padding: 24px;
       border-radius: 10px;
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--app-muted-background);
+      color: var(--app-chart-legend-text);
     }
 
     .loading-state {
@@ -203,8 +204,8 @@ interface HoldingRow {
     }
 
     .error-state {
-      background: #fee2e2;
-      color: #991b1b;
+      background: var(--app-error-background);
+      color: var(--app-error-text);
       gap: 16px;
     }
 
@@ -230,11 +231,11 @@ interface HoldingRow {
     }
 
     .summary-card {
-      background: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);
+      background: linear-gradient(135deg, var(--app-light-surface) 0%, var(--app-white) 100%);
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--app-border);
       transition: all 0.2s ease;
     }
 
@@ -256,7 +257,7 @@ interface HoldingRow {
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-weight: 600;
     }
 
@@ -264,13 +265,13 @@ interface HoldingRow {
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .card-value {
       font-size: 28px;
       font-weight: 700;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .allocation-card,
@@ -278,7 +279,7 @@ interface HoldingRow {
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--app-border);
       margin-bottom: 24px;
     }
 
@@ -288,20 +289,20 @@ interface HoldingRow {
       align-items: center;
       margin-bottom: 18px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--app-border);
     }
 
     .card-header h2 {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .position-count {
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 13px;
-      background: #f3f4f6;
+      background: var(--app-muted-background);
       padding: 4px 12px;
       border-radius: 6px;
     }
@@ -316,26 +317,26 @@ interface HoldingRow {
     }
 
     .holdings-table th {
-      background-color: #f9fafb;
-      border-bottom: 2px solid #e5e7eb;
+      background-color: var(--app-table-header);
+      border-bottom: 2px solid var(--app-border);
       padding: 12px 16px;
       text-align: left;
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #6b7280;
+      color: var(--app-muted-text);
     }
 
     .holdings-table td {
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--app-border);
       padding: 14px 16px;
-      color: #1f2937;
+      color: var(--app-table-text);
       font-size: 14px;
     }
 
     .table-row:hover {
-      background-color: #f9fafb;
+      background-color: var(--app-table-header);
     }
 
     .allocation-content {
@@ -353,7 +354,7 @@ interface HoldingRow {
 
     .chart-track {
       fill: none;
-      stroke: #e5e7eb;
+      stroke: var(--app-chart-track);
       stroke-width: 14;
     }
 
@@ -375,7 +376,7 @@ interface HoldingRow {
       align-items: center;
       gap: 10px;
       padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--app-subtle-border);
     }
 
     .legend-item:last-child {
@@ -398,19 +399,19 @@ interface HoldingRow {
 
     .legend-symbol {
       font-weight: 700;
-      color: #003057;
+      color: var(--app-primary);
       font-size: 14px;
     }
 
     .legend-value {
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 13px;
     }
 
     .symbol-badge {
       display: inline-block;
-      background: #e0e7ff;
-      color: #3730a3;
+      background: var(--app-muted-background);
+      color: var(--app-info);
       padding: 4px 10px;
       border-radius: 6px;
       font-weight: 600;
@@ -418,12 +419,12 @@ interface HoldingRow {
     }
 
     .gain {
-      color: #059669;
+      color: var(--app-success);
       font-weight: 600;
     }
 
     .loss {
-      color: #dc2626;
+      color: var(--app-danger);
       font-weight: 600;
     }
 
@@ -442,7 +443,7 @@ interface HoldingRow {
       justify-content: center;
       gap: 12px;
       padding: 48px 24px;
-      color: #6b7280;
+      color: var(--app-muted-text);
       text-align: center;
     }
 
@@ -450,19 +451,19 @@ interface HoldingRow {
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #d1d5db;
+      color: var(--app-border);
       margin-bottom: 8px;
     }
 
     .empty-title {
       font-size: 16px;
       font-weight: 600;
-      color: #374151;
+      color: var(--app-chart-legend-text);
     }
 
     .empty-detail {
       font-size: 14px;
-      color: #6b7280;
+      color: var(--app-muted-text);
     }
   `]
 })
@@ -529,7 +530,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private getChartColor(index: number) {
-    const colors = ['#003057', '#4f46e5', '#0f766e', '#d97706', '#dc2626', '#7c3aed'];
+    const colors = [appColors.primary, appColors.secondary, appColors.accent, appColors.warning, appColors.danger, appColors.purple];
     return colors[index % colors.length];
   }
 

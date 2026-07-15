@@ -6,6 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { NgIf } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { appColors } from '../../shared/theme/colors';
 
 @Component({
   standalone: true,
@@ -98,11 +99,11 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .collapse-button {
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .active-link {
-      background: rgba(0, 48, 87, 0.08);
+      background: rgba(var(--app-primary-rgb), 0.08);
       border-radius: 8px;
     }
 

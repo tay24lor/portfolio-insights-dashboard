@@ -5,6 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { PortfolioService, HoldingRow } from '../../core/services/portfolio.service';
+import { appColors } from '../../shared/theme/colors';
 
 @Component({
   standalone: true,
@@ -110,12 +111,12 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       margin: 0 0 6px;
       font-size: 32px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .header p {
       margin: 0;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 15px;
     }
 
@@ -125,8 +126,8 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       gap: 12px;
       padding: 24px;
       border-radius: 10px;
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--app-muted-background);
+      color: var(--app-chart-legend-text);
     }
 
     .loading-state {
@@ -134,8 +135,8 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
     }
 
     .error-state {
-      background: #fee2e2;
-      color: #991b1b;
+      background: var(--app-error-background);
+      color: var(--app-error-text);
       gap: 16px;
     }
 
@@ -157,7 +158,7 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--app-border);
     }
 
     .card-header {
@@ -166,27 +167,27 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       align-items: flex-start;
       margin-bottom: 18px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--app-border);
     }
 
     .card-header h2 {
       margin: 0 0 4px;
       font-size: 20px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .position-count {
       display: inline-block;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 13px;
-      background: #f3f4f6;
+      background: var(--app-muted-background);
       padding: 4px 12px;
       border-radius: 6px;
     }
 
     .header-icon {
-      color: #003057;
+      color: var(--app-primary);
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -202,32 +203,32 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
     }
 
     .holdings-table th {
-      background-color: #a6c3df;
-      border-bottom: 2px solid #e5e7eb;
+      background-color: var(--app-table-header-blue);
+      border-bottom: 2px solid var(--app-border);
       padding: 12px 16px;
       text-align: left;
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #6b7280;
+      color: var(--app-muted-text);
     }
 
     .holdings-table td {
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--app-border);
       padding: 14px 16px;
-      color: #546e94;
+      color: var(--app-table-text);
       font-size: 14px;
     }
 
     .table-row:hover {
-      background-color: #f9fafb;
+      background-color: var(--app-table-header);
     }
 
     .symbol-badge {
       display: inline-block;
-      background: #e0e7ff;
-      color: #3730a3;
+      background: var(--app-muted-background);
+      color: var(--app-info);
       padding: 6px 12px;
       border-radius: 6px;
       font-weight: 600;
@@ -235,12 +236,12 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
     }
 
     .gain {
-      color: #059669;
+      color: var(--app-success);
       font-weight: 600;
     }
 
     .loss {
-      color: #dc2626;
+      color: var(--app-danger);
       font-weight: 600;
     }
 
@@ -254,7 +255,7 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
 
     .total-value {
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .empty-state {
@@ -264,7 +265,7 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       justify-content: center;
       gap: 12px;
       padding: 48px 24px;
-      color: #6b7280;
+      color: var(--app-muted-text);
       text-align: center;
     }
 
@@ -272,19 +273,19 @@ import { PortfolioService, HoldingRow } from '../../core/services/portfolio.serv
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #d1d5db;
+      color: var(--app-border);
       margin-bottom: 8px;
     }
 
     .empty-title {
       font-size: 16px;
       font-weight: 600;
-      color: #374151;
+      color: var(--app-chart-legend-text);
     }
 
     .empty-detail {
       font-size: 14px;
-      color: #6b7280;
+      color: var(--app-muted-text);
     }
   `]
 })

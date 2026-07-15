@@ -10,3 +10,13 @@ export const getSummary = async (req: Request, res: Response, next: NextFunction
     next(err);
   }
 };
+
+export const getPerformance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user.id;
+    const performance = await portfolioService.fetchPerformance(userId);
+    res.json(performance);
+  } catch (err) {
+    next(err);
+  }
+};

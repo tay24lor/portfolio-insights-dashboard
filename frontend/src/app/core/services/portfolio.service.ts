@@ -21,6 +21,17 @@ export interface HoldingRow {
   current_price: number;
 }
 
+export interface PerformancePoint {
+  label: string;
+  value: number;
+}
+
+export interface PerformanceSummary {
+  total_return: number;
+  return_rate: number;
+  trend: PerformancePoint[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
   private http = inject(HttpClient);
@@ -32,5 +43,9 @@ export class PortfolioService {
 
   getHoldings(): Observable<HoldingRow[]> {
     return this.http.get<HoldingRow[]>(`${this.api}/holdings`);
+  }
+
+  getPerformance(): Observable<PerformanceSummary> {
+    return this.http.get<PerformanceSummary>(`${this.api}/portfolio/performance`);
   }
 }

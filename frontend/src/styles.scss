@@ -3,13 +3,42 @@ html, body {
   margin: 0;
 }
 
+:root {
+  --app-primary: #003057;
+  --app-secondary: #4f46e5;
+  --app-accent: #0f766e;
+  --app-warning: #d97706;
+  --app-danger: #dc2626;
+  --app-purple: #7c3aed;
+  --app-muted-text: #6b7280;
+  --app-muted-background: #f3f4f6;
+  --app-border: #e5e7eb;
+  --app-light-surface: #f8f9fb;
+  --app-white: #ffffff;
+  --app-success: #059669;
+  --app-info: #3730a3;
+  --app-subtle-border: #f3f4f6;
+  --app-chart-track: #e5e7eb;
+  --app-chart-bar-start: #4f46e5;
+  --app-chart-bar-end: #003057;
+  --app-surface: #ffffff;
+  --app-surface-alt: #f5f7fa;
+  --app-table-header: #f9fafb;
+  --app-table-header-blue: #a6c3df;
+  --app-table-text: #546e94;
+  --app-error-text: #991b1b;
+  --app-error-background: #fee2e2;
+  --app-chart-legend-text: #374151;
+  --app-primary-rgb: 0, 48, 87;
+}
+
 .mat-toolbar {
-  background: #003057 !important; // Fidelity navy
-  color: white !important;
+  background: var(--app-primary) !important;
+  color: var(--app-white) !important;
 }
 
 .sidenav {
-  background: #f5f7fa;
+  background: var(--app-surface-alt);
 }
 
 .mat-list-item mat-icon {

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSummary = void 0;
+exports.getPerformance = exports.getSummary = void 0;
 const portfolioService = __importStar(require("../services/portfolio.service"));
 const getSummary = async (req, res, next) => {
     try {
@@ -46,3 +46,14 @@ const getSummary = async (req, res, next) => {
     }
 };
 exports.getSummary = getSummary;
+const getPerformance = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const performance = await portfolioService.fetchPerformance(userId);
+        res.json(performance);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getPerformance = getPerformance;

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { users, User } from "../models/User";
 import { mockDb } from "../mock/mock.db";
 import dotenv from "dotenv";
+import { config } from "../config/env";
 
 dotenv.config();
 
@@ -50,7 +51,7 @@ export class AuthService {
       email: user.email
     };
 
-    const secret = process.env.JWT_SECRET ?? "dev-secret";
+    const secret = config.jwtSecret;
     const expiresIn: jwt.SignOptions["expiresIn"] =
       (process.env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"]) ?? "1h";
     console.log("JWT SIGN CALL IS RUNNING FROM:", __filename);

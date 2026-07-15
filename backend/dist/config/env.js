@@ -7,6 +7,6 @@ exports.config = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 exports.config = {
-    jwtSecret: process.env.JWT_SECRET || 'dev_secret',
+    jwtSecret: process.env.JWT_SECRET || 'dev-secret',
     dbUrl: process.env.DB_URL || ''
 };

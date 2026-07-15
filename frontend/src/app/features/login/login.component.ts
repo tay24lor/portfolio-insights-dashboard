@@ -99,7 +99,7 @@ import { NgFor } from '@angular/common';
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #003057, #005a8d);
+      background: linear-gradient(135deg, var(--app-primary), var(--app-accent));
     }
 
     .login-card {
@@ -108,14 +108,14 @@ import { NgFor } from '@angular/common';
       text-align: center;
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      background: #ffffff;
+      background: var(--app-white);
     }
 
     .title {
       margin-bottom: 12px;
       font-size: 24px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .full {
@@ -130,7 +130,7 @@ import { NgFor } from '@angular/common';
 
     .forgot a {
       cursor: pointer;
-      color: #005a8d;
+      color: var(--app-accent);
       font-size: 14px;
       text-decoration: none;
     }

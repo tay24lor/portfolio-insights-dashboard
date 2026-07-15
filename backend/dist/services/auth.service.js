@@ -9,6 +9,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = require("../models/User");
 const mock_db_1 = require("../mock/mock.db");
 const dotenv_1 = __importDefault(require("dotenv"));
+const env_1 = require("../config/env");
 dotenv_1.default.config();
 class AuthService {
     async register(email, password) {
@@ -48,7 +49,7 @@ class AuthService {
             id: user.id,
             email: user.email
         };
-        const secret = process.env.JWT_SECRET ?? "dev-secret";
+        const secret = env_1.config.jwtSecret;
         const expiresIn = process.env.JWT_EXPIRES_IN ?? "1h";
         console.log("JWT SIGN CALL IS RUNNING FROM:", __filename);
         const token = jsonwebtoken_1.default.sign(payload, secret, { expiresIn });

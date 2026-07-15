@@ -3,12 +3,8 @@ import { NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PortfolioService, PortfolioSummary } from '../../core/services/portfolio.service';
-
-interface PerformancePoint {
-  label: string;
-  value: number;
-}
+import { PortfolioService, PerformanceSummary, PerformancePoint } from '../../core/services/portfolio.service';
+import { appColors } from '../../shared/theme/colors';
 
 @Component({
   standalone: true,
@@ -87,12 +83,12 @@ interface PerformancePoint {
       margin: 0 0 6px;
       font-size: 32px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .header p {
       margin: 0;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 15px;
     }
 
@@ -102,8 +98,8 @@ interface PerformancePoint {
       gap: 12px;
       padding: 24px;
       border-radius: 10px;
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--app-muted-background);
+      color: var(--app-chart-legend-text);
     }
 
     .loading-state {
@@ -111,8 +107,8 @@ interface PerformancePoint {
     }
 
     .error-state {
-      background: #fee2e2;
-      color: #991b1b;
+      background: var(--app-error-background);
+      color: var(--app-error-text);
       gap: 16px;
     }
 
@@ -141,7 +137,7 @@ interface PerformancePoint {
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--app-border);
     }
 
     .chart-card {
@@ -155,7 +151,7 @@ interface PerformancePoint {
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-weight: 600;
       margin-bottom: 12px;
     }
@@ -164,18 +160,18 @@ interface PerformancePoint {
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .card-value {
       font-size: 28px;
       font-weight: 700;
-      color: #003057;
+      color: var(--app-primary);
       margin-bottom: 8px;
     }
 
     .card-caption {
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 13px;
     }
 
@@ -190,13 +186,13 @@ interface PerformancePoint {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #003057;
+      color: var(--app-primary);
     }
 
     .position-count {
-      color: #6b7280;
+      color: var(--app-muted-text);
       font-size: 13px;
-      background: #f3f4f6;
+      background: var(--app-muted-background);
       padding: 4px 12px;
       border-radius: 6px;
     }
@@ -228,7 +224,7 @@ interface PerformancePoint {
     .bar {
       width: 100%;
       max-width: 48px;
-      background: linear-gradient(180deg, #4f46e5 0%, #003057 100%);
+      background: linear-gradient(180deg, ${appColors.chartBarStart} 0%, ${appColors.chartBarEnd} 100%);
       border-radius: 8px 8px 0 0;
       min-height: 20px;
     }
@@ -253,19 +249,11 @@ export class PerformanceComponent implements OnInit {
   }
 
   private loadPerformance() {
-    this.portfolioService.getSummary().subscribe({
-      next: (summary) => {
-        const costBasis = summary.total_value * 0.9;
-        this.totalReturn = summary.total_value - costBasis;
-        this.returnRate = Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1));
-        this.trendData = [
-          { label: 'Jan', value: 55 },
-          { label: 'Feb', value: 68 },
-          { label: 'Mar', value: 72 },
-          { label: 'Apr', value: 76 },
-          { label: 'May', value: 80 },
-          { label: 'Jun', value: 88 }
-        ];
+    this.portfolioService.getPerformance().subscribe({
+      next: (summary: PerformanceSummary) => {
+        this.totalReturn = summary.total_return;
+        this.returnRate = summary.return_rate;
+        this.trendData = summary.trend;
         this.loading = false;
       },
       error: () => {
