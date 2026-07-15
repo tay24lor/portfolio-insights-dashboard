@@ -3,6 +3,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { NgIf } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -14,27 +15,33 @@ import { AuthService } from '../../core/services/auth.service';
     MatToolbarModule,
     MatIconModule,
     MatListModule,
-    RouterModule
+    RouterModule,
+    NgIf
   ],
   template: `
     <mat-sidenav-container class="container">
-      <mat-sidenav mode="side" opened class="sidenav">
-        <h3 class="logo">Portfolio Insights</h3>
+      <mat-sidenav mode="side" [opened]="isOpen" [class.collapsed]="!isOpen" class="sidenav">
+        <div class="sidenav-header">
+          <h3 class="logo">Portfolio Insights</h3>
+          <button mat-icon-button class="collapse-button" (click)="toggle()" aria-label="Toggle sidebar">
+            <mat-icon>{{ isOpen ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+          </button>
+        </div>
 
         <mat-nav-list>
-          <a mat-list-item routerLink="/dashboard">
+          <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
             <mat-icon>dashboard</mat-icon>
-            <span>Dashboard</span>
+            <span *ngIf="isOpen">Dashboard</span>
           </a>
 
-          <a mat-list-item routerLink="/holdings">
+          <a mat-list-item routerLink="/holdings" routerLinkActive="active-link">
             <mat-icon>table_chart</mat-icon>
-            <span>Holdings</span>
+            <span *ngIf="isOpen">Holdings</span>
           </a>
 
-          <a mat-list-item routerLink="/performance">
+          <a mat-list-item routerLink="/performance" routerLinkActive="active-link">
             <mat-icon>show_chart</mat-icon>
-            <span>Performance</span>
+            <span *ngIf="isOpen">Performance</span>
           </a>
         </mat-nav-list>
       </mat-sidenav>
@@ -68,12 +75,35 @@ import { AuthService } from '../../core/services/auth.service';
     .sidenav {
       width: 240px;
       padding-top: 16px;
+      transition: width 0.2s ease;
+    }
+
+    .sidenav.collapsed {
+      width: 72px;
+    }
+
+    .sidenav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px 0 12px;
+      margin-bottom: 8px;
     }
 
     .logo {
-      text-align: center;
-      margin-bottom: 16px;
+      margin: 0;
       font-weight: 600;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    .collapse-button {
+      color: #003057;
+    }
+
+    .active-link {
+      background: rgba(0, 48, 87, 0.08);
+      border-radius: 8px;
     }
 
     .title {
@@ -95,8 +125,10 @@ export class LayoutComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
 
+  isOpen = true;
+
   toggle() {
-    // For mobile later
+    this.isOpen = !this.isOpen;
   }
 
   logout() {

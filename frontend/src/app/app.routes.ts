@@ -19,6 +19,11 @@ export const routes: Routes = [
           import('./features/holdings/holdings.component').then(m => m.HoldingsComponent)
       },
       {
+        path: 'performance',
+        loadComponent: () =>
+          import('./features/performance/performance.component').then(m => m.PerformanceComponent)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

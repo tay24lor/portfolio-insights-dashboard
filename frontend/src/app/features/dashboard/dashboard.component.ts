@@ -1,11 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { NgIf, CurrencyPipe } from '@angular/common';
+import { NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-import { PortfolioService, PortfolioSummary } from '../../core/services/portfolio.service';
+import { PortfolioService, PortfolioSummary, AllocationItem } from '../../core/services/portfolio.service';
+
+interface ChartSegment {
+  color: string;
+  dashArray: string;
+  dashOffset: string;
+}
 
 interface HoldingRow {
   symbol: string;
@@ -17,7 +23,7 @@ interface HoldingRow {
 @Component({
   standalone: true,
   selector: 'app-dashboard',
-  imports: [NgIf, CurrencyPipe, MatCardModule, MatProgressSpinnerModule, MatIconModule, MatTableModule, MatButtonModule],
+  imports: [NgIf, NgFor, CurrencyPipe, MatCardModule, MatProgressSpinnerModule, MatIconModule, MatTableModule, MatButtonModule],
   template: `
     <div class="dashboard-shell">
       <div class="header">
@@ -61,6 +67,47 @@ interface HoldingRow {
           </div>
         </mat-card>
       </div>
+
+      <mat-card class="allocation-card" *ngIf="!loading && !error">
+        <div class="card-header">
+          <h2>Allocation</h2>
+          <span class="position-count">{{ allocation.length }} position{{ allocation.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="allocation-content" *ngIf="allocation.length; else emptyAllocation">
+          <svg class="allocation-chart" viewBox="0 0 100 100" aria-label="Portfolio allocation chart">
+            <circle cx="50" cy="50" r="38" class="chart-track"></circle>
+            <circle
+              *ngFor="let segment of chartSegments"
+              cx="50"
+              cy="50"
+              r="38"
+              class="chart-segment"
+              [attr.stroke]="segment.color"
+              [attr.stroke-dasharray]="segment.dashArray"
+              [attr.stroke-dashoffset]="segment.dashOffset"
+              transform="rotate(-90 50 50)"></circle>
+          </svg>
+
+          <div class="legend">
+            <div class="legend-item" *ngFor="let item of allocation">
+              <span class="legend-color" [style.background]="item.color"></span>
+              <div class="legend-text">
+                <span class="legend-symbol">{{ item.symbol }}</span>
+                <span class="legend-value">{{ formatCurrency(item.value) }} · {{ item.percentage }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyAllocation>
+          <div class="empty-state">
+            <mat-icon class="empty-icon">pie_chart</mat-icon>
+            <span class="empty-title">No allocation data yet</span>
+            <span class="empty-detail">Your positions will appear here once available.</span>
+          </div>
+        </ng-template>
+      </mat-card>
 
       <mat-card class="holdings-card" *ngIf="!loading && !error">
         <div class="card-header">
@@ -226,11 +273,13 @@ interface HoldingRow {
       color: #003057;
     }
 
+    .allocation-card,
     .holdings-card {
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       border: 1px solid #e5e7eb;
+      margin-bottom: 24px;
     }
 
     .card-header {
@@ -287,6 +336,75 @@ interface HoldingRow {
 
     .table-row:hover {
       background-color: #f9fafb;
+    }
+
+    .allocation-content {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .allocation-chart {
+      width: 180px;
+      height: 180px;
+      flex-shrink: 0;
+    }
+
+    .chart-track {
+      fill: none;
+      stroke: #e5e7eb;
+      stroke-width: 14;
+    }
+
+    .chart-segment {
+      fill: none;
+      stroke-width: 14;
+      stroke-linecap: round;
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 220px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .legend-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .legend-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .legend-symbol {
+      font-weight: 700;
+      color: #003057;
+      font-size: 14px;
+    }
+
+    .legend-value {
+      color: #6b7280;
+      font-size: 13px;
     }
 
     .symbol-badge {
@@ -353,6 +471,8 @@ export class DashboardComponent implements OnInit {
 
   summary: PortfolioSummary | null = null;
   holdings: HoldingRow[] = [];
+  allocation: Array<AllocationItem & { color: string }> = [];
+  chartSegments: ChartSegment[] = [];
   displayedColumns = ['symbol', 'shares', 'avg_price', 'current_price', 'gain_loss'];
   loading = true;
   error = '';
@@ -366,6 +486,11 @@ export class DashboardComponent implements OnInit {
     this.portfolioService.getSummary().subscribe({
       next: (summary) => {
         this.summary = summary;
+        this.allocation = (summary.allocation ?? []).map((item, index) => ({
+          ...item,
+          color: this.getChartColor(index)
+        }));
+        this.chartSegments = this.buildChartSegments(this.allocation);
       },
       error: () => {
         this.error = 'Unable to load portfolio summary.';
@@ -384,6 +509,28 @@ export class DashboardComponent implements OnInit {
         this.error = 'Unable to load holdings.';
       }
     });
+  }
+
+  private buildChartSegments(allocation: Array<AllocationItem & { color: string }>): ChartSegment[] {
+    const totalValue = allocation.reduce((sum, item) => sum + item.value, 0);
+    const circumference = 2 * Math.PI * 38;
+    let offset = 0;
+
+    return allocation.map((item) => {
+      const length = totalValue > 0 ? (item.value / totalValue) * circumference : 0;
+      const segment: ChartSegment = {
+        color: item.color,
+        dashArray: `${length.toFixed(2)} ${circumference.toFixed(2)}`,
+        dashOffset: `${(-offset).toFixed(2)}`
+      };
+      offset += length;
+      return segment;
+    });
+  }
+
+  private getChartColor(index: number) {
+    const colors = ['#003057', '#4f46e5', '#0f766e', '#d97706', '#dc2626', '#7c3aed'];
+    return colors[index % colors.length];
   }
 
   formatCurrency(value: number) {

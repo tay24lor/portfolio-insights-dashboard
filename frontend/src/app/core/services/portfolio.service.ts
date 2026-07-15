@@ -2,9 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface AllocationItem {
+  symbol: string;
+  value: number;
+  percentage: number;
+}
+
 export interface PortfolioSummary {
   total_value: number;
   holdings_count: number;
+  allocation: AllocationItem[];
 }
 
 export interface HoldingRow {
