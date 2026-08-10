@@ -24,6 +24,11 @@ export const routes: Routes = [
           import('./features/performance/performance.component').then(m => m.PerformanceComponent)
       },
       {
+        path: 'cashflow',
+        loadComponent: () =>
+          import('./features/cashflow/cashflow.component').then(m => m.CashflowComponent)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

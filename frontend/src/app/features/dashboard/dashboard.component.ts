@@ -5,7 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-import { PortfolioService, PortfolioSummary, AllocationItem } from '../../core/services/portfolio.service';
+import { PortfolioService, PortfolioSummary, AllocationItem, RiskExposureSummary, RebalanceSummary, RebalanceRecommendation, WatchlistItem, TransactionItem } from '../../core/services/portfolio.service';
 import { appColors } from '../../shared/theme/colors';
 
 interface ChartSegment {
@@ -67,7 +67,98 @@ interface HoldingRow {
             <div class="card-value">{{ summary.holdings_count }}</div>
           </div>
         </mat-card>
+
+        <mat-card class="summary-card risk-card" *ngIf="riskSummary">
+          <div class="card-content">
+            <div class="card-label">
+              <mat-icon>health_and_safety</mat-icon>
+              Risk Exposure
+            </div>
+            <div class="card-value risk-value">{{ riskSummary.risk_level }}</div>
+            <div class="risk-detail">
+              <span>{{ riskSummary.concentration_pct }}% top position</span>
+              <span class="divider">·</span>
+              <span>{{ riskSummary.diversification_score }}% diversification</span>
+            </div>
+          </div>
+        </mat-card>
       </div>
+
+      <mat-card class="recommendations-card" *ngIf="!loading && !error">
+        <div class="card-header">
+          <h2>Rebalancing Recommendations</h2>
+          <span class="position-count">{{ recommendations.length }} item{{ recommendations.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="recommendation-grid" *ngIf="recommendations.length; else emptyRecommendations">
+          <div class="rec-row" *ngFor="let rec of recommendations">
+            <span class="symbol-badge">{{ rec.symbol }}</span>
+            <span class="rec-status" [class.add-action]="rec.action === 'Add'" [class.trim-action]="rec.action === 'Trim'">
+              {{ rec.action }} {{ rec.delta_pct }}% target weight
+            </span>
+            <span class="rec-meta">Current {{ rec.current_pct }}% · Target {{ rec.target_pct }}%</span>
+          </div>
+        </div>
+
+        <ng-template #emptyRecommendations>
+          <div class="empty-state compact-empty">
+            <mat-icon class="empty-icon">balance</mat-icon>
+            <span class="empty-title">No recommendations yet</span>
+            <span class="empty-detail">Your model will flag drift once holdings are available.</span>
+          </div>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="watchlist-card" *ngIf="!loading && !error">
+        <div class="card-header">
+          <h2>Watchlist & Alerts</h2>
+          <span class="position-count">{{ watchlist.length }} symbol{{ watchlist.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="watchlist-grid" *ngIf="watchlist.length; else emptyWatchlist">
+          <div class="watch-row" *ngFor="let item of watchlist">
+            <span class="symbol-badge">{{ item.symbol }}</span>
+            <span class="watch-price">{{ formatCurrency(item.current_price) }}</span>
+            <span class="watch-direction" [class.up]="item.direction === 'Up'" [class.down]="item.direction === 'Down'">
+              {{ item.direction }} target {{ formatCurrency(item.target_price) }}
+            </span>
+            <span class="alert-chip" *ngIf="item.alert_active">Alert</span>
+          </div>
+        </div>
+
+        <ng-template #emptyWatchlist>
+          <div class="empty-state compact-empty">
+            <mat-icon class="empty-icon">notifications_active</mat-icon>
+            <span class="empty-title">No watchlist signals</span>
+            <span class="empty-detail">Add preferred symbols to monitor price drift.</span>
+          </div>
+        </ng-template>
+      </mat-card>
+
+      <mat-card class="activity-card" *ngIf="!loading && !error">
+        <div class="card-header">
+          <h2>Recent Activity</h2>
+          <span class="position-count">{{ transactions.length }} event{{ transactions.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="activity-grid" *ngIf="transactions.length; else emptyTransactions">
+          <div class="activity-row" *ngFor="let transaction of transactions">
+            <span class="activity-date">{{ transaction.date }}</span>
+            <span class="activity-type">{{ transaction.type }}</span>
+            <span class="activity-symbol" *ngIf="transaction.symbol">{{ transaction.symbol }}</span>
+            <span class="activity-description">{{ transaction.description }}</span>
+            <span class="activity-amount" [class.debit]="transaction.type === 'Buy' || transaction.type === 'Withdrawal' || transaction.type === 'Deposit'">{{ transaction.type === 'Dividend' ? '+' : '' }}{{ formatCurrency(transaction.amount) }}</span>
+          </div>
+        </div>
+
+        <ng-template #emptyTransactions>
+          <div class="empty-state compact-empty">
+            <mat-icon class="empty-icon">receipt_long</mat-icon>
+            <span class="empty-title">No activity yet</span>
+            <span class="empty-detail">Cash and trade activity will appear here.</span>
+          </div>
+        </ng-template>
+      </mat-card>
 
       <mat-card class="allocation-card" *ngIf="!loading && !error">
         <div class="card-header">
@@ -244,6 +335,27 @@ interface HoldingRow {
       transform: translateY(-2px);
     }
 
+    .risk-card {
+      border-left: 4px solid var(--app-info);
+    }
+
+    .risk-detail {
+      color: var(--app-muted-text);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .divider {
+      font-weight: 700;
+    }
+
+    .risk-value {
+      font-size: 24px;
+    }
+
     .card-content {
       display: flex;
       flex-direction: column;
@@ -275,7 +387,9 @@ interface HoldingRow {
     }
 
     .allocation-card,
-    .holdings-card {
+    .holdings-card,
+    .watchlist-card,
+    .recommendations-card {
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -337,6 +451,148 @@ interface HoldingRow {
 
     .table-row:hover {
       background-color: var(--app-table-header);
+    }
+
+    .recommendation-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rec-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--app-subtle-border);
+    }
+
+    .rec-row:last-child {
+      border-bottom: none;
+    }
+
+    .rec-status {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--app-primary);
+    }
+
+    .rec-status.add-action {
+      color: var(--app-success);
+    }
+
+    .rec-status.trim-action {
+      color: var(--app-danger);
+    }
+
+    .rec-meta {
+      color: var(--app-muted-text);
+      font-size: 12px;
+    }
+
+    .activity-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .activity-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--app-subtle-border);
+      padding: 10px 0;
+    }
+
+    .activity-row:last-child {
+      border-bottom: none;
+    }
+
+    .activity-date {
+      color: var(--app-muted-text);
+      font-size: 12px;
+      min-width: 90px;
+    }
+
+    .activity-type {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--app-primary);
+      min-width: 70px;
+    }
+
+    .activity-symbol {
+      background: var(--app-muted-background);
+      padding: 4px 9px;
+      border-radius: 6px;
+      color: var(--app-info);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .activity-description {
+      flex: 1;
+      font-size: 13px;
+      color: var(--app-chart-legend-text);
+    }
+
+    .activity-amount {
+      font-weight: 700;
+      color: var(--app-success);
+    }
+
+    .activity-amount.debit {
+      color: var(--app-danger);
+    }
+
+    .watchlist-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .watch-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--app-subtle-border);
+    }
+
+    .watch-row:last-child {
+      border-bottom: none;
+    }
+
+    .watch-price {
+      font-weight: 700;
+      color: var(--app-primary);
+    }
+
+    .watch-direction {
+      color: var(--app-muted-text);
+      font-size: 13px;
+    }
+
+    .watch-direction.up {
+      color: var(--app-success);
+    }
+
+    .watch-direction.down {
+      color: var(--app-danger);
+    }
+
+    .alert-chip {
+      background: var(--app-warning);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .compact-empty {
+      padding: 26px 24px;
     }
 
     .allocation-content {
@@ -472,6 +728,10 @@ export class DashboardComponent implements OnInit {
 
   summary: PortfolioSummary | null = null;
   holdings: HoldingRow[] = [];
+  riskSummary: RiskExposureSummary | null = null;
+  recommendations: RebalanceRecommendation[] = [];
+  watchlist: WatchlistItem[] = [];
+  transactions: TransactionItem[] = [];
   allocation: Array<AllocationItem & { color: string }> = [];
   chartSegments: ChartSegment[] = [];
   displayedColumns = ['symbol', 'shares', 'avg_price', 'current_price', 'gain_loss'];
@@ -481,6 +741,10 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.loadSummary();
     this.loadHoldings();
+    this.loadRisk();
+    this.loadRecommendations();
+    this.loadWatchlist();
+    this.loadTransactions();
   }
 
   loadSummary() {
@@ -508,6 +772,56 @@ export class DashboardComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.error = 'Unable to load holdings.';
+      }
+    });
+  }
+
+  loadRisk() {
+    this.portfolioService.getRisk().subscribe({
+      next: (riskSummary) => {
+        this.riskSummary = riskSummary;
+      },
+      error: () => {
+        this.riskSummary = {
+          risk_level: 'Moderate',
+          concentration_pct: 0,
+          diversification_score: 0,
+          largest_position_symbol: 'N/A',
+          largest_position_value: 0
+        };
+      }
+    });
+  }
+
+  loadRecommendations() {
+    this.portfolioService.getRecommendations().subscribe({
+      next: (summary: RebalanceSummary) => {
+        this.recommendations = summary.recommendations;
+      },
+      error: () => {
+        this.recommendations = [];
+      }
+    });
+  }
+
+  loadWatchlist() {
+    this.portfolioService.getWatchlist().subscribe({
+      next: (watchlist) => {
+        this.watchlist = watchlist;
+      },
+      error: () => {
+        this.watchlist = [];
+      }
+    });
+  }
+
+  loadTransactions() {
+    this.portfolioService.getTransactions().subscribe({
+      next: (transactions) => {
+        this.transactions = transactions;
+      },
+      error: () => {
+        this.transactions = [];
       }
     });
   }

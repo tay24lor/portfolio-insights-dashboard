@@ -3,13 +3,14 @@ import { NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PortfolioService, PerformanceSummary, PerformancePoint } from '../../core/services/portfolio.service';
+import { MatButtonModule } from '@angular/material/button';
+import { PortfolioService, PerformanceSummary, PerformancePoint, PerformanceRange, BenchmarkSummary } from '../../core/services/portfolio.service';
 import { appColors } from '../../shared/theme/colors';
 
 @Component({
   standalone: true,
   selector: 'app-performance',
-  imports: [NgIf, NgFor, MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [NgIf, NgFor, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   template: `
     <div class="page-shell">
       <div class="header">
@@ -51,10 +52,32 @@ import { appColors } from '../../shared/theme/colors';
           <div class="card-caption">Estimated gain on the current portfolio.</div>
         </mat-card>
 
+        <mat-card class="summary-card benchmark-card" *ngIf="benchmark">
+          <div class="card-label">
+            <mat-icon>compare_arrows</mat-icon>
+            Benchmark
+          </div>
+          <div class="card-value benchmark-value">{{ benchmark.status }}</div>
+          <div class="card-caption">
+            <span>{{ benchmark.benchmark_name }}: {{ benchmark.benchmark_return }}%</span>
+            <span class="divider">·</span>
+            <span>Portfolio: {{ benchmark.portfolio_return }}%</span>
+            <span class="divider">·</span>
+            <span>Diff: {{ benchmark.difference > 0 ? '+' : '' }}{{ benchmark.difference }}%</span>
+          </div>
+        </mat-card>
+
         <mat-card class="chart-card">
           <div class="card-header">
             <h2>Portfolio Value Trend</h2>
-            <span class="position-count">Last 6 months</span>
+            <span class="position-count">{{ selectedRange }}</span>
+          </div>
+
+          <div class="range-controls">
+            <button mat-button class="range-button" [class.active]="selectedRange === '1M'" (click)="selectRange('1M')">1M</button>
+            <button mat-button class="range-button" [class.active]="selectedRange === '3M'" (click)="selectRange('3M')">3M</button>
+            <button mat-button class="range-button" [class.active]="selectedRange === 'YTD'" (click)="selectRange('YTD')">YTD</button>
+            <button mat-button class="range-button" [class.active]="selectedRange === '1Y'" (click)="selectRange('1Y')">1Y</button>
           </div>
 
           <div class="chart-area">
@@ -130,6 +153,34 @@ import { appColors } from '../../shared/theme/colors';
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
+    }
+
+    .benchmark-card {
+      border-left: 4px solid var(--app-accent);
+    }
+
+    .benchmark-value {
+      font-size: 24px;
+    }
+
+    .range-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .range-button {
+      background: var(--app-muted-background);
+      color: var(--app-primary);
+      border-radius: 999px;
+      font-size: 12px;
+      min-width: auto;
+      padding: 4px 12px;
+    }
+
+    .range-button.active {
+      background: var(--app-primary);
+      color: white;
     }
 
     .summary-card,
@@ -243,13 +294,22 @@ export class PerformanceComponent implements OnInit {
   totalReturn = 0;
   returnRate = 0;
   trendData: PerformancePoint[] = [];
+  selectedRange: PerformanceRange = '1Y';
+  benchmark: BenchmarkSummary | null = null;
 
   ngOnInit() {
+    this.loadPerformance();
+    this.loadBenchmark();
+  }
+
+  selectRange(range: PerformanceRange) {
+    this.selectedRange = range;
+    this.loading = true;
     this.loadPerformance();
   }
 
   private loadPerformance() {
-    this.portfolioService.getPerformance().subscribe({
+    this.portfolioService.getPerformance(this.selectedRange).subscribe({
       next: (summary: PerformanceSummary) => {
         this.totalReturn = summary.total_return;
         this.returnRate = summary.return_rate;
@@ -259,6 +319,17 @@ export class PerformanceComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.error = 'Unable to load performance data.';
+      }
+    });
+  }
+
+  private loadBenchmark() {
+    this.portfolioService.getBenchmark().subscribe({
+      next: (benchmark: BenchmarkSummary) => {
+        this.benchmark = benchmark;
+      },
+      error: () => {
+        this.benchmark = null;
       }
     });
   }

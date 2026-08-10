@@ -44,6 +44,11 @@ import { appColors } from '../../shared/theme/colors';
             <mat-icon>show_chart</mat-icon>
             <span *ngIf="isOpen">Performance</span>
           </a>
+
+          <a mat-list-item routerLink="/cashflow" routerLinkActive="active-link">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span *ngIf="isOpen">Cash Flow</span>
+          </a>
         </mat-nav-list>
       </mat-sidenav>
 

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPerformance = exports.getSummary = void 0;
+exports.getTransactions = exports.getWatchlist = exports.getRebalancing = exports.getRisk = exports.getCashflow = exports.getBenchmark = exports.getPerformance = exports.getSummary = void 0;
 const portfolioService = __importStar(require("../services/portfolio.service"));
 const getSummary = async (req, res, next) => {
     try {
@@ -49,7 +49,8 @@ exports.getSummary = getSummary;
 const getPerformance = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const performance = await portfolioService.fetchPerformance(userId);
+        const range = req.query.range || '1Y';
+        const performance = await portfolioService.fetchPerformance(userId, range);
         res.json(performance);
     }
     catch (err) {
@@ -57,3 +58,69 @@ const getPerformance = async (req, res, next) => {
     }
 };
 exports.getPerformance = getPerformance;
+const getBenchmark = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const benchmark = await portfolioService.fetchBenchmark(userId);
+        res.json(benchmark);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getBenchmark = getBenchmark;
+const getCashflow = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const cashflow = await portfolioService.fetchCashflow(userId);
+        res.json(cashflow);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getCashflow = getCashflow;
+const getRisk = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const risk = await portfolioService.fetchRisk(userId);
+        res.json(risk);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getRisk = getRisk;
+const getRebalancing = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const recommendations = await portfolioService.fetchRecommendations(userId);
+        res.json(recommendations);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getRebalancing = getRebalancing;
+const getWatchlist = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const watchlist = await portfolioService.fetchWatchlist(userId);
+        res.json(watchlist);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getWatchlist = getWatchlist;
+const getTransactions = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const transactions = await portfolioService.fetchTransactions(userId);
+        res.json(transactions);
+    }
+    catch (err) {
+        next(err);
+    }
+};
+exports.getTransactions = getTransactions;

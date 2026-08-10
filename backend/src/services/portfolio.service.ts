@@ -22,22 +22,257 @@ export const fetchSummary = async (userId: number) => {
   };
 };
 
-export const fetchPerformance = async (userId: number) => {
+export const fetchPerformance = async (userId: number, range: string = '1Y') => {
   const summary = await mockDb.getPortfolioSummary(userId);
   const costBasis = summary.total_value * 0.9;
   const totalReturn = summary.total_value - costBasis;
   const returnRate = Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1));
 
+  const trendMap: Record<string, Array<{ label: string; value: number }>> = {
+    '1M': [
+      { label: 'W1', value: 60 },
+      { label: 'W2', value: 61 },
+      { label: 'W3', value: 72 },
+      { label: 'W4', value: 78 }
+    ],
+    '3M': [
+      { label: 'Jan', value: 52 },
+      { label: 'Feb', value: 60 },
+      { label: 'Mar', value: 68 },
+      { label: 'Apr', value: 70 },
+      { label: 'May', value: 79 },
+      { label: 'Jun', value: 82 }
+    ],
+    YTD: [
+      { label: 'Jan', value: 50 },
+      { label: 'Feb', value: 55 },
+      { label: 'Mar', value: 62 },
+      { label: 'Apr', value: 72 },
+      { label: 'May', value: 75 },
+      { label: 'Jun', value: 80 },
+      { label: 'Jul', value: 88 },
+      { label: 'Aug', value: 92 }
+    ],
+    '1Y': [
+      { label: 'Jan', value: 50 },
+      { label: 'Feb', value: 58 },
+      { label: 'Mar', value: 63 },
+      { label: 'Apr', value: 70 },
+      { label: 'May', value: 75 },
+      { label: 'Jun', value: 84 },
+      { label: 'Jul', value: 88 },
+      { label: 'Aug', value: 90 },
+      { label: 'Sep', value: 94 },
+      { label: 'Oct', value: 96 },
+      { label: 'Nov', value: 98 },
+      { label: 'Dec', value: 100 }
+    ]
+  };
+
+  const trend = trendMap[range] ?? trendMap['1Y'];
+
   return {
     total_return: totalReturn,
     return_rate: returnRate,
-    trend: [
-      { label: 'Jan', value: 55 },
-      { label: 'Feb', value: 68 },
-      { label: 'Mar', value: 72 },
-      { label: 'Apr', value: 76 },
-      { label: 'May', value: 80 },
-      { label: 'Jun', value: 88 }
+    trend
+  };
+};
+
+export const fetchBenchmark = async (userId: number) => {
+  const summary = await mockDb.getPortfolioSummary(userId);
+  const portfolioReturn = Number((((summary.total_value - (summary.total_value * 0.9)) / (summary.total_value * 0.9)) * 100).toFixed(1));
+
+  return {
+    benchmark_name: 'S&P 500',
+    benchmark_return: 11.5,
+    portfolio_return: portfolioReturn,
+    difference: Number((portfolioReturn - 11.5).toFixed(1)),
+    status: portfolioReturn >= 11.5 ? 'Outperforming' : 'Lagging'
+  };
+};
+
+export const fetchCashflow = async (userId: number) => {
+  const summary = await mockDb.getPortfolioSummary(userId);
+  const availableCash = Math.round(summary.total_value * 0.06);
+  const monthlyIncome = Math.round(summary.total_value * 0.018);
+  const monthlySpend = Math.round(summary.total_value * 0.01);
+
+  return {
+    available_cash: availableCash,
+    monthly_income: monthlyIncome,
+    monthly_spend: monthlySpend,
+    monthly_net: Number((monthlyIncome - monthlySpend).toFixed(2)),
+    forecast: [
+      { month: 'Aug', inflow: monthlyIncome, outflow: monthlySpend, net: monthlyIncome - monthlySpend },
+      { month: 'Sep', inflow: monthlyIncome + 250, outflow: monthlySpend + 120, net: (monthlyIncome + 250) - (monthlySpend + 120) },
+      { month: 'Oct', inflow: monthlyIncome + 340, outflow: monthlySpend + 145, net: (monthlyIncome + 340) - (monthlySpend + 145) },
+      { month: 'Nov', inflow: monthlyIncome + 420, outflow: monthlySpend + 170, net: (monthlyIncome + 420) - (monthlySpend + 170) },
+      { month: 'Dec', inflow: monthlyIncome + 510, outflow: monthlySpend + 230, net: (monthlyIncome + 510) - (monthlySpend + 230) },
+      { month: 'Jan', inflow: monthlyIncome + 600, outflow: monthlySpend + 280, net: (monthlyIncome + 600) - (monthlySpend + 280) }
     ]
   };
+};
+
+export const fetchRisk = async (userId: number) => {
+  const holdings = await mockDb.getHoldingsByUserId(userId);
+
+  if (!holdings.length) {
+    return {
+      risk_level: 'Low',
+      concentration_pct: 0,
+      diversification_score: 100,
+      largest_position_symbol: 'N/A',
+      largest_position_value: 0
+    };
+  }
+
+  const totalValue = holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0);
+
+  const allocation = holdings.map((holding) => {
+    const value = holding.shares * holding.current_price;
+    return {
+      symbol: holding.symbol,
+      value,
+      percentage: totalValue > 0 ? Number(((value / totalValue) * 100).toFixed(1)) : 0
+    };
+  });
+
+  const topPosition = allocation.reduce((max, item) => item.value > max.value ? item : max, allocation[0]);
+  const concentrationPct = Number(((topPosition.value / totalValue) * 100).toFixed(1));
+  const diversificationScore = Math.max(0, Number((100 - concentrationPct).toFixed(1)));
+
+  const riskLevel = concentrationPct >= 45
+    ? 'High'
+    : concentrationPct >= 30
+      ? 'Elevated'
+      : concentrationPct >= 20
+        ? 'Moderate'
+        : 'Low';
+
+  return {
+    risk_level: riskLevel,
+    concentration_pct: concentrationPct,
+    diversification_score: diversificationScore,
+    largest_position_symbol: topPosition.symbol,
+    largest_position_value: topPosition.value
+  };
+};
+
+export const fetchRecommendations = async (userId: number) => {
+  const holdings = await mockDb.getHoldingsByUserId(userId);
+
+  if (!holdings.length) {
+    return {
+      recommendations: []
+    };
+  }
+
+  const totalValue = holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0);
+  const targetBySymbol: Record<string, number> = {
+    AAPL: 35,
+    MSFT: 35,
+    GOOGL: 30
+  };
+
+  const allocation = holdings.map((holding) => {
+    const value = holding.shares * holding.current_price;
+    return {
+      symbol: holding.symbol,
+      value,
+      percentage: totalValue > 0 ? Number(((value / totalValue) * 100).toFixed(1)) : 0
+    };
+  });
+
+  const recommendations = allocation.map((item) => {
+    const targetPct = targetBySymbol[item.symbol] ?? 20;
+    const deltaPct = Number((targetPct - item.percentage).toFixed(1));
+
+    if (Math.abs(deltaPct) < 1) {
+      return {
+        symbol: item.symbol,
+        current_pct: item.percentage,
+        target_pct: targetPct,
+        action: 'Hold',
+        delta_pct: 0
+      };
+    }
+
+    return {
+      symbol: item.symbol,
+      current_pct: item.percentage,
+      target_pct: targetPct,
+      action: deltaPct > 0 ? 'Add' : 'Trim',
+      delta_pct: Math.abs(deltaPct)
+    };
+  });
+
+  return {
+    recommendations
+  };
+};
+
+export const fetchWatchlist = async (userId: number) => {
+  const holdings = await mockDb.getHoldingsByUserId(userId);
+
+  if (!holdings.length) {
+    return [];
+  }
+
+  const targetMap: Record<string, number> = {
+    AAPL: 190,
+    MSFT: 340,
+    GOOGL: 1500
+  };
+
+  return holdings.map((holding) => {
+    const target = targetMap[holding.symbol] ?? holding.current_price;
+    const delta = holding.current_price - target;
+
+    return {
+      symbol: holding.symbol,
+      current_price: holding.current_price,
+      target_price: target,
+      direction: delta > 0 ? 'Up' : delta < 0 ? 'Down' : 'Flat',
+      alert_active: Math.abs(delta) >= 15
+    };
+  });
+};
+
+export const fetchTransactions = async (userId: number) => {
+  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const amount = holdings.length ? holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0) : 0;
+
+  return [
+    {
+      id: 1,
+      type: 'Buy',
+      symbol: 'AAPL',
+      amount: 1800,
+      date: '2026-08-10',
+      description: 'AAPL buy order executed'
+    },
+    {
+      id: 2,
+      type: 'Dividend',
+      symbol: 'MSFT',
+      amount: 82.5,
+      date: '2026-08-01',
+      description: 'MSFT dividend received'
+    },
+    {
+      id: 3,
+      type: 'Deposit',
+      amount: 5000,
+      date: '2026-07-24',
+      description: 'Cash deposit'
+    },
+    {
+      id: 4,
+      type: 'Buy',
+      symbol: 'GOOGL',
+      amount: Math.round(amount * 0.1),
+      date: '2026-07-12',
+      description: 'GOOGL purchase'
+    }
+  ];
 };
