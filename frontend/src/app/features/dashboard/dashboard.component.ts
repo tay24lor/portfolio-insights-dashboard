@@ -389,7 +389,8 @@ interface HoldingRow {
     .allocation-card,
     .holdings-card,
     .watchlist-card,
-    .recommendations-card {
+    .recommendations-card,
+    .activity-card {
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);

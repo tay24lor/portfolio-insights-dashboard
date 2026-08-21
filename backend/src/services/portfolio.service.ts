@@ -36,12 +36,9 @@ export const fetchPerformance = async (userId: number, range: string = '1Y') => 
       { label: 'W4', value: 78 }
     ],
     '3M': [
-      { label: 'Jan', value: 52 },
-      { label: 'Feb', value: 60 },
-      { label: 'Mar', value: 68 },
-      { label: 'Apr', value: 70 },
-      { label: 'May', value: 79 },
-      { label: 'Jun', value: 82 }
+      { label: 'Jun', value: 82 },
+      { label: 'Jul', value: 88 },
+      { label: 'Aug', value: 92 }
     ],
     YTD: [
       { label: 'Jan', value: 50 },

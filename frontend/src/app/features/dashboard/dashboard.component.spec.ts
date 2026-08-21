@@ -8,7 +8,7 @@ describe('DashboardComponent', () => {
   let fixture: ComponentFixture<DashboardComponent>;
 
   beforeEach(async () => {
-    const portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', ['getSummary', 'getHoldings', 'getRisk', 'getRecommendations', 'getWatchlist']);
+    const portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', ['getSummary', 'getHoldings', 'getRisk', 'getRecommendations', 'getWatchlist', 'getTransactions']);
     portfolioServiceSpy.getSummary.and.returnValue(of({
       total_value: 120000,
       holdings_count: 2,
@@ -32,6 +32,7 @@ describe('DashboardComponent', () => {
         alert_active: true
       }
     ]));
+    portfolioServiceSpy.getTransactions.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
