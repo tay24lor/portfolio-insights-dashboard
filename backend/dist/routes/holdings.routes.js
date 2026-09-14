@@ -5,4 +5,7 @@ const holdings_controller_1 = require("../controllers/holdings.controller");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 router.get('/', auth_middleware_1.authMiddleware, holdings_controller_1.getHoldings);
+router.post('/', auth_middleware_1.authMiddleware, holdings_controller_1.postHolding);
+router.patch('/:id', auth_middleware_1.authMiddleware, holdings_controller_1.patchHolding);
+router.delete('/:id', auth_middleware_1.authMiddleware, holdings_controller_1.removeHolding);
 exports.default = router;

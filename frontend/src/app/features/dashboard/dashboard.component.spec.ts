@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { PortfolioService } from '../../core/services/portfolio.service';
+import { beforeEach, describe, it } from 'node:test';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -58,3 +59,7 @@ describe('DashboardComponent', () => {
     expect(compiled.textContent).toContain('Moderate');
   });
 });
+function expect(arg0: any) {
+    throw new Error('Function not implemented.');
+}
+

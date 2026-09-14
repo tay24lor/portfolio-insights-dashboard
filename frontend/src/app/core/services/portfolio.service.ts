@@ -15,6 +15,14 @@ export interface PortfolioSummary {
 }
 
 export interface HoldingRow {
+  id: number;
+  symbol: string;
+  shares: number;
+  avg_price: number;
+  current_price: number;
+}
+
+export interface HoldingInput {
   symbol: string;
   shares: number;
   avg_price: number;
@@ -105,6 +113,18 @@ export class PortfolioService {
 
   getHoldings(): Observable<HoldingRow[]> {
     return this.http.get<HoldingRow[]>(`${this.api}/holdings`);
+  }
+
+  createHolding(input: HoldingInput): Observable<HoldingRow> {
+    return this.http.post<HoldingRow>(`${this.api}/holdings`, input);
+  }
+
+  updateHolding(id: number, input: Partial<HoldingInput>): Observable<HoldingRow> {
+    return this.http.patch<HoldingRow>(`${this.api}/holdings/${id}`, input);
+  }
+
+  deleteHolding(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/holdings/${id}`);
   }
 
   getPerformance(range: PerformanceRange = '1Y'): Observable<PerformanceSummary> {

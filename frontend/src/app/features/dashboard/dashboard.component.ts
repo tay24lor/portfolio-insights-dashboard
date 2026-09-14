@@ -5,20 +5,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-import { PortfolioService, PortfolioSummary, AllocationItem, RiskExposureSummary, RebalanceSummary, RebalanceRecommendation, WatchlistItem, TransactionItem } from '../../core/services/portfolio.service';
+import { PortfolioService, PortfolioSummary, AllocationItem, RiskExposureSummary, RebalanceSummary, RebalanceRecommendation, WatchlistItem, TransactionItem, HoldingRow } from '../../core/services/portfolio.service';
+import { PortfolioStateService } from '../../core/services/portfolio-state.service';
 import { appColors } from '../../shared/theme/colors';
 
 interface ChartSegment {
   color: string;
   dashArray: string;
   dashOffset: string;
-}
-
-interface HoldingRow {
-  symbol: string;
-  shares: number;
-  avg_price: number;
-  current_price: number;
 }
 
 @Component({
@@ -726,9 +720,9 @@ interface HoldingRow {
 })
 export class DashboardComponent implements OnInit {
   private portfolioService = inject(PortfolioService);
+  private portfolioState = inject(PortfolioStateService);
 
   summary: PortfolioSummary | null = null;
-  holdings: HoldingRow[] = [];
   riskSummary: RiskExposureSummary | null = null;
   recommendations: RebalanceRecommendation[] = [];
   watchlist: WatchlistItem[] = [];
@@ -738,6 +732,10 @@ export class DashboardComponent implements OnInit {
   displayedColumns = ['symbol', 'shares', 'avg_price', 'current_price', 'gain_loss'];
   loading = true;
   error = '';
+
+  get holdings(): HoldingRow[] {
+    return this.portfolioState.holdings();
+  }
 
   ngOnInit() {
     this.loadSummary();
@@ -765,14 +763,10 @@ export class DashboardComponent implements OnInit {
   }
 
   loadHoldings() {
-    this.portfolioService.getHoldings().subscribe({
-      next: (holdings) => {
-        this.holdings = holdings;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.error = 'Unable to load holdings.';
+    this.portfolioState.loadHoldings(() => {
+      this.loading = false;
+      if (this.portfolioState.error()) {
+        this.error = this.portfolioState.error()!;
       }
     });
   }

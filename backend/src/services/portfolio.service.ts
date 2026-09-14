@@ -1,8 +1,7 @@
-import { mockDb } from "../mock/mock.db";
+import { fetchHoldings } from './holdings.service';
 
 export const fetchSummary = async (userId: number) => {
-  const summary = await mockDb.getPortfolioSummary(userId);
-  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const holdings = await fetchHoldings(userId);
   const totalValue = holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0);
 
   const allocation = holdings
@@ -17,16 +16,17 @@ export const fetchSummary = async (userId: number) => {
     .sort((a, b) => b.value - a.value);
 
   return {
-    ...summary,
+    total_value: totalValue,
+    holdings_count: holdings.length,
     allocation
   };
 };
 
 export const fetchPerformance = async (userId: number, range: string = '1Y') => {
-  const summary = await mockDb.getPortfolioSummary(userId);
+  const summary = await fetchSummary(userId);
   const costBasis = summary.total_value * 0.9;
   const totalReturn = summary.total_value - costBasis;
-  const returnRate = Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1));
+  const returnRate = costBasis ? Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1)) : 0;
 
   const trendMap: Record<string, Array<{ label: string; value: number }>> = {
     '1M': [
@@ -76,8 +76,9 @@ export const fetchPerformance = async (userId: number, range: string = '1Y') => 
 };
 
 export const fetchBenchmark = async (userId: number) => {
-  const summary = await mockDb.getPortfolioSummary(userId);
-  const portfolioReturn = Number((((summary.total_value - (summary.total_value * 0.9)) / (summary.total_value * 0.9)) * 100).toFixed(1));
+  const summary = await fetchSummary(userId);
+  const costBasis = summary.total_value * 0.9;
+  const portfolioReturn = costBasis ? Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1)) : 0;
 
   return {
     benchmark_name: 'S&P 500',
@@ -89,7 +90,7 @@ export const fetchBenchmark = async (userId: number) => {
 };
 
 export const fetchCashflow = async (userId: number) => {
-  const summary = await mockDb.getPortfolioSummary(userId);
+  const summary = await fetchSummary(userId);
   const availableCash = Math.round(summary.total_value * 0.06);
   const monthlyIncome = Math.round(summary.total_value * 0.018);
   const monthlySpend = Math.round(summary.total_value * 0.01);
@@ -111,7 +112,7 @@ export const fetchCashflow = async (userId: number) => {
 };
 
 export const fetchRisk = async (userId: number) => {
-  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const holdings = await fetchHoldings(userId);
 
   if (!holdings.length) {
     return {
@@ -156,7 +157,7 @@ export const fetchRisk = async (userId: number) => {
 };
 
 export const fetchRecommendations = async (userId: number) => {
-  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const holdings = await fetchHoldings(userId);
 
   if (!holdings.length) {
     return {
@@ -209,7 +210,7 @@ export const fetchRecommendations = async (userId: number) => {
 };
 
 export const fetchWatchlist = async (userId: number) => {
-  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const holdings = await fetchHoldings(userId);
 
   if (!holdings.length) {
     return [];
@@ -236,7 +237,7 @@ export const fetchWatchlist = async (userId: number) => {
 };
 
 export const fetchTransactions = async (userId: number) => {
-  const holdings = await mockDb.getHoldingsByUserId(userId);
+  const holdings = await fetchHoldings(userId);
   const amount = holdings.length ? holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0) : 0;
 
   return [

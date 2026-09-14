@@ -1,10 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchTransactions = exports.fetchWatchlist = exports.fetchRecommendations = exports.fetchRisk = exports.fetchCashflow = exports.fetchBenchmark = exports.fetchPerformance = exports.fetchSummary = void 0;
-const mock_db_1 = require("../mock/mock.db");
+const holdings_service_1 = require("./holdings.service");
 const fetchSummary = async (userId) => {
-    const summary = await mock_db_1.mockDb.getPortfolioSummary(userId);
-    const holdings = await mock_db_1.mockDb.getHoldingsByUserId(userId);
+    const holdings = await (0, holdings_service_1.fetchHoldings)(userId);
     const totalValue = holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0);
     const allocation = holdings
         .map((holding) => {
@@ -17,16 +16,17 @@ const fetchSummary = async (userId) => {
     })
         .sort((a, b) => b.value - a.value);
     return {
-        ...summary,
+        total_value: totalValue,
+        holdings_count: holdings.length,
         allocation
     };
 };
 exports.fetchSummary = fetchSummary;
 const fetchPerformance = async (userId, range = '1Y') => {
-    const summary = await mock_db_1.mockDb.getPortfolioSummary(userId);
+    const summary = await (0, exports.fetchSummary)(userId);
     const costBasis = summary.total_value * 0.9;
     const totalReturn = summary.total_value - costBasis;
-    const returnRate = Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1));
+    const returnRate = costBasis ? Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1)) : 0;
     const trendMap = {
         '1M': [
             { label: 'W1', value: 60 },
@@ -73,8 +73,9 @@ const fetchPerformance = async (userId, range = '1Y') => {
 };
 exports.fetchPerformance = fetchPerformance;
 const fetchBenchmark = async (userId) => {
-    const summary = await mock_db_1.mockDb.getPortfolioSummary(userId);
-    const portfolioReturn = Number((((summary.total_value - (summary.total_value * 0.9)) / (summary.total_value * 0.9)) * 100).toFixed(1));
+    const summary = await (0, exports.fetchSummary)(userId);
+    const costBasis = summary.total_value * 0.9;
+    const portfolioReturn = costBasis ? Number((((summary.total_value - costBasis) / costBasis) * 100).toFixed(1)) : 0;
     return {
         benchmark_name: 'S&P 500',
         benchmark_return: 11.5,
@@ -85,7 +86,7 @@ const fetchBenchmark = async (userId) => {
 };
 exports.fetchBenchmark = fetchBenchmark;
 const fetchCashflow = async (userId) => {
-    const summary = await mock_db_1.mockDb.getPortfolioSummary(userId);
+    const summary = await (0, exports.fetchSummary)(userId);
     const availableCash = Math.round(summary.total_value * 0.06);
     const monthlyIncome = Math.round(summary.total_value * 0.018);
     const monthlySpend = Math.round(summary.total_value * 0.01);
@@ -106,7 +107,7 @@ const fetchCashflow = async (userId) => {
 };
 exports.fetchCashflow = fetchCashflow;
 const fetchRisk = async (userId) => {
-    const holdings = await mock_db_1.mockDb.getHoldingsByUserId(userId);
+    const holdings = await (0, holdings_service_1.fetchHoldings)(userId);
     if (!holdings.length) {
         return {
             risk_level: 'Low',
@@ -145,7 +146,7 @@ const fetchRisk = async (userId) => {
 };
 exports.fetchRisk = fetchRisk;
 const fetchRecommendations = async (userId) => {
-    const holdings = await mock_db_1.mockDb.getHoldingsByUserId(userId);
+    const holdings = await (0, holdings_service_1.fetchHoldings)(userId);
     if (!holdings.length) {
         return {
             recommendations: []
@@ -191,7 +192,7 @@ const fetchRecommendations = async (userId) => {
 };
 exports.fetchRecommendations = fetchRecommendations;
 const fetchWatchlist = async (userId) => {
-    const holdings = await mock_db_1.mockDb.getHoldingsByUserId(userId);
+    const holdings = await (0, holdings_service_1.fetchHoldings)(userId);
     if (!holdings.length) {
         return [];
     }
@@ -214,7 +215,7 @@ const fetchWatchlist = async (userId) => {
 };
 exports.fetchWatchlist = fetchWatchlist;
 const fetchTransactions = async (userId) => {
-    const holdings = await mock_db_1.mockDb.getHoldingsByUserId(userId);
+    const holdings = await (0, holdings_service_1.fetchHoldings)(userId);
     const amount = holdings.length ? holdings.reduce((sum, holding) => sum + holding.shares * holding.current_price, 0) : 0;
     return [
         {
