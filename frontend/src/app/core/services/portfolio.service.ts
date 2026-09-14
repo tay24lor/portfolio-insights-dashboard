@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AllocationItem {
   symbol: string;
@@ -105,7 +106,7 @@ export interface TransactionItem {
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
   private http = inject(HttpClient);
-  private api = 'http://localhost:8080/api';
+  private api = environment.apiUrl;
 
   getSummary(): Observable<PortfolioSummary> {
     return this.http.get<PortfolioSummary>(`${this.api}/portfolio/summary`);

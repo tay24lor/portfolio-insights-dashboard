@@ -71,6 +71,15 @@ From `frontend/`:
 - `npm run watch` — build continuously in development mode
 - `npm run serve:ssr:frontend` — run SSR backend bundle after building
 
+## Deployment
+
+The GitHub Pages workflow deploys the Angular browser build only. Before running it, add these repository variables under **Settings > Secrets and variables > Actions > Variables**:
+
+- `BACKEND_URL` — public HTTPS URL of the deployed backend, without a trailing slash (for example, `https://portfolio-api.example.com`)
+- `PAGES_BASE_HREF` — optional base path; it defaults to `/<repository-name>/` for a GitHub Pages project site. Use `/` for a custom domain.
+
+The backend must be deployed separately. The included `backend/app.yaml` supports Google App Engine; other Node.js hosts can run `npm run build` followed by `npm start` from `backend/`.
+
 ## API endpoints
 
 ### Auth
